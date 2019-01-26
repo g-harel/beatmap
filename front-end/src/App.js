@@ -5,8 +5,27 @@ const styles = require('./styles/GoogleMapStyles.json')
 
 export class MapContainer extends Component {
 
+  constructor(props) {
+    super(props); 
+    this.state = {
+       lat: '41.850033',
+       lng: '-87.6500523'
+    }
+ }
+
   addMarker = (location, map) => {
-    console.log(location);
+    var latlng = String(location).replace(/[{()}]/g, '');
+    var split = latlng.split(',');
+
+    var lat = split[0];
+    var lng = split[1];
+
+    this.setState({
+      lat: lat,
+      lng: lng
+    });
+
+    console.log(lat + "-" + lng);
   }
 
   render() {
@@ -14,9 +33,10 @@ export class MapContainer extends Component {
       <body>
         <h1>ConUHack</h1>
         <p>Gab, Phil & Feken</p>
+        <p>lat: {this.state.lat} - lng:{this.state.lng}</p>
         <Map
           google={this.props.google}
-          zoom={4}
+          zoom={4.5}
           styles={styles}
           mapTypeControl={false}
           streetViewControl={false}
@@ -29,8 +49,7 @@ export class MapContainer extends Component {
             lng: -87.6500523
           }}
           onClick={(t, map, c) => this.addMarker(c.latLng, map)}
-        >
-        <Marker lat={41.850033} lng={-87.6500523} />  
+        > 
         </Map>
       </body>
     );
