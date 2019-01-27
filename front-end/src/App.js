@@ -8,12 +8,12 @@ export class MapContainer extends Component {
   constructor(props) {
     super(props); 
     this.state = {
-       lat: '41.850033',
-       lng: '-87.6500523'
+       lat: '',
+       lng: ''
     }
  }
 
-  addMarker = (location, map) => {
+ addMarker = async (location, map) => {
     var latlng = String(location).replace(/[{()}]/g, '');
     var split = latlng.split(',');
 
@@ -25,8 +25,27 @@ export class MapContainer extends Component {
       lng: lng
     });
 
-    console.log(lat + "-" + lng);
+    var rawResponse = fetch('http://localhost:5000/plays', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "start_date": "1999-02-01T21:00:02Z",
+        "end_date": "1999-02-01T22:00:02Z",
+        "coordinates": [{
+          "long": lng,
+          "lat": lat
+        }]
+      })
+    })
+    .then(response => response.text);
+
+    //TODO resolve promise with awaits/async, not sure
+    console.log(rawResponse);
   }
+  
 
   render() {
     return (
@@ -49,7 +68,11 @@ export class MapContainer extends Component {
             lng: -87.6500523
           }}
           onClick={(t, map, c) => this.addMarker(c.latLng, map)}
-        > 
+        >  
+        <Marker
+          position={{ lat: this.state.lat, lng: this.state.lng}}
+          name={'Music around here'}
+        />  
         </Map>
       </body>
     );
