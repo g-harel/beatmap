@@ -71,15 +71,15 @@ def get_top_songs():
         thread.join()
 
     # clear the pool for next async operations
-    thread_pool = []
+    song_thread_pool = []
     for song in songs:
         cached_data = song_cache.get(song['songId'])
         if cached_data is None:
             thread = Thread(target=fetch_song_name, args=[song['songId'], song])
-            thread_pool.append(thread)
+            song_thread_pool.append(thread)
             thread.start()
 
-    for thread in thread_pool:
+    for thread in song_thread_pool:
         thread.join()
 
     return jsonify({'data': songs})
@@ -91,7 +91,8 @@ def get_top_coordinates(artistId):
         """
     SELECT COUNT(playDate), longitude, latitude, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
     WHERE artistId = @artistId
-    GROUP BY longitude, latitude, style ORDER BY count DESC LIMIT 10 """
+    GROUP BY longitude, latitude, style
+    ORDER BY count DESC LIMIT 10 """
     )
 
     query_params = [
