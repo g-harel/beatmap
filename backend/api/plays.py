@@ -31,7 +31,7 @@ def plays_data():
 @plays_route.route('/top', methods=['POST'])
 def get_top_songs():
     request_data = request.get_json(force=True)
-    arr = [request_data['coordinates']]
+    arr = request_data['coordinates']
 
     geo_from_json = {"type": "Polygon", "coordinates": arr}
     query = (
@@ -67,7 +67,6 @@ def get_top_songs():
             thread_pool.append(thread)
             thread.start()
 
-    thread_pool.append(thread)
     for thread in thread_pool:
         thread.join()
 
@@ -80,7 +79,6 @@ def get_top_songs():
             thread_pool.append(thread)
             thread.start()
 
-    thread_pool.append(thread)
     for thread in thread_pool:
         thread.join()
 
