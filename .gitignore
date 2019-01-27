@@ -38,6 +38,7 @@ jspm_packages/
 
 # JetBrains
 .idea/*
+.idea/workspace.xml
 
 # TypeScript v1 declaration files
 typings/
