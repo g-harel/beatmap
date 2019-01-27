@@ -39,6 +39,7 @@ jspm_packages/
 # JetBrains
 .idea/*
 .idea/workspace.xml
+frontend/package-lock.json
 
 # TypeScript v1 declaration files
 typings/
