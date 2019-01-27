@@ -1,0 +1,63 @@
+$sidebar: 500px;
+
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: calc(100% - #{$sidebar});
+}
+
+#sidebar {
+    background-color: #343332;
+    height: 100%;
+    position: absolute;
+    right: 0;
+    width: $sidebar;
+
+    .waiting {
+        height: 100%;
+        width: 100%;
+        font-weight: bold;
+        font-size: 1.8em;
+        color: #535353;
+    }
+
+    .item {
+        padding: 30px 20px;
+        box-sizing: border-box;
+        height: 10%;
+        border: 1px solid rgb(44, 44, 44);
+        border-bottom: none;
+
+        .count {
+            color: #191a1a;
+            font-size: 2em;
+            font-weight: bold;
+            text-align: right;
+            height: 0;
+            width: 30px;
+            transform: translateX(-10px);
+            user-select: none;
+        }
+
+        .song {
+            color: #d8d8d8;
+            font-weight: bold;
+            font-size: 1.3em;
+            padding-left: 40px;
+        }
+
+        .artist {
+            color: #999;
+            font-size: 1.1em;
+            padding-left: 40px;
+            text-transform: capitalize;
+        }
+    }
+}

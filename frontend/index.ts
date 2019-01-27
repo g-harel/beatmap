@@ -1,4 +1,4 @@
-import "./index.css";
+import "./index.scss";
 
 import {updateSidebar} from "./sidebar";
 
@@ -8,8 +8,8 @@ mapboxgl.accessToken =
 var map = new mapboxgl.Map({
     container: "map",
     style: "mapbox://styles/mapbox/dark-v9",
-    center: [-87, 41],
-    zoom: 6,
+    center: [-96, 42],
+    zoom: 4,
 });
 
 var draw = new MapboxDraw({
