@@ -3,9 +3,9 @@ import got from "got";
 const hostname = "conuhacks-playback-api.touchtunes.com";
 const path = "/plays";
 const secret = "9923ac9b-8fd3-421f-b0e5-952f807c6885";
+
 const limit = 5000;
-const parallel = 64;
-const gap = 12 * 60 * 60 * 1000;
+const batchSize = 24 * 60 * 60 * 1000;
 
 interface Play {
     playDate: string;
@@ -55,45 +55,38 @@ const fetchByRange = async (
     callback: (play: Play) => any,
 ): Promise<void> => {
     const delta = end.getTime() - start.getTime();
-    const subset = delta / gap;
+    const batches = delta / batchSize;
 
-    for (let i = 0; i < subset; i++) {
-        const startI = start.getTime() + i * gap;
-        const endI = startI + gap;
-        const startD = new Date(startI);
-        const endD = new Date(endI);
+    for (let i = 0; i < batches; i++) {
+        const startTimestamp = start.getTime() + i * batchSize;
+        const startDate = new Date(startTimestamp);
+        const endDate = new Date(Math.min(startTimestamp + batchSize, end.getTime()));
 
-        // Fetch initial page to efficiently query paged data.
-        const resInitial = await fetchData(startD, endD, 0, limit);
-        resInitial.plays.forEach(callback);
+        // Fetch initial page to read size of entire dataset.
+        const resInitial = await fetchData(startDate, endDate, 0, 1);
+        const pageCount = Math.ceil(resInitial.totalRecordsCount / limit);
 
-        // Fetch paged data in parallel.
-        const remaining = resInitial.totalRecordsCount - resInitial.plays.length;
-        for (let j = 0; j < remaining / (limit * parallel); j++) {
-            const responses: Promise<any>[] = [];
-            for (let k = 0; k < parallel; k++) {
-                const page = j * parallel + k;
-                responses.push(
-                    fetchData(startD, endD, page, limit).then(({plays}) => {
-                        plays.forEach(callback);
-                    }),
-                );
-            }
-            await Promise.all(responses);
-        }
+        const pages = Array(pageCount)
+            .fill(null)
+            .map((_, page) => {
+                return fetchData(startDate, endDate, page, limit).then(({plays}) => {
+                    plays.forEach(callback);
+                });
+            });
+
+        await Promise.all(pages);
     }
 };
 
-let i = 0;
 const main = async () => {
     console.time();
+    let i = 0;
     await fetchByRange(
-        new Date("January 1, 2018"),
-        new Date("January 2, 2018"),
-        (_) => {
-            if (1) process.stdout.write(`\rplays ${i++}`);
-        },
+        new Date("December 3, 2018"),
+        new Date("December 4, 2018"),
+        (_) => i++,
     );
+    console.log("total", i);
     console.timeEnd();
 };
 
