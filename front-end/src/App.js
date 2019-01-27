@@ -25,10 +25,9 @@ export class MapContainer extends Component {
       lng: lng
     });
 
-    var rawResponse = fetch('http://localhost:5000/plays', {
+    await fetch('http://localhost:5000/plays', {
       method: 'POST',
       headers: {
-        'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -39,11 +38,10 @@ export class MapContainer extends Component {
           "lat": lat
         }]
       })
-    })
-    .then(response => response.text);
-
+    }).then(response => response.json())
+    .then(jsonResponse => console.log(jsonResponse))
     //TODO resolve promise with awaits/async, not sure
-    console.log(rawResponse);
+
   }
   
 

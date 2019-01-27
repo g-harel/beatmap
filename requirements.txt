@@ -4,3 +4,7 @@ marshmallow-sqlalchemy
 flask_sqlalchemy
 flask-apispec
 flask_testing
+flask.ext.cache
+requests
+flask_cors
+Flask-Cache
