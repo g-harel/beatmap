@@ -7,6 +7,16 @@ class PlaysCoordinatesSchema(Schema):
 
 
 class PlaysRequestSchema(Schema):
-    start_date = fields.DateTime(required=True)
-    end_date   = fields.DateTime(required=True)
+    start_date = fields.DateTime()
+    end_date   = fields.DateTime()
     coordinates = fields.Nested(PlaysCoordinatesSchema, many=True)
+
+
+class Res(Schema):
+    state = fields.String()
+    playDate =  fields.DateTime()
+    artistId = fields.Integer()
+    songId = fields.Integer()
+    style = fields.DateTime()
+    latitude = fields.Float()
+    longitude = fields.Float()
