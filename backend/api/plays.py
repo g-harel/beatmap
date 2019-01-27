@@ -28,23 +28,6 @@ def plays_data():
     return jsonify({'data': mocks.data})
 
 
-@plays_route.route('', methods=['GET'])
-def get_plays():
-    query = (
-        "SELECT state FROM `conuhacks2019-229901.plays.*` LIMIT 100"
-    )
-    query_job = client.query(
-        query,
-        # Location must match that of the dataset(s) referenced in the query.
-        location="US",
-    )  # API request - starts the query
-
-    res = query_job.result()
-    data = plays.Res(many=True).load(res)
-
-    return jsonify({'data':data})
-
-
 @plays_route.route('/top', methods=['POST'])
 def get_top_songs():
     request_data = request.get_json(force=True)
@@ -53,7 +36,7 @@ def get_top_songs():
     geo_from_json = {"type": "Polygon", "coordinates": arr}
     query = (
         """
-    SELECT songId,artistId, COUNT(playDate), style, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
+    SELECT songId, artistId, COUNT(playDate), style, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
     WHERE ST_DWITHIN(ST_GEOGPOINT(longitude, latitude), ST_GEOGFROMGEOJSON(@s), 0)
     GROUP BY songId, artistId, style ORDER BY count DESC LIMIT 10 """
     )
@@ -100,3 +83,34 @@ def get_top_songs():
         thread.join()
 
     return jsonify({'data': songs})
+
+
+@plays_route.route('/<int:artistId>', methods=['GET'])
+def get_top_coordinates(artistId):
+    query = (
+        """
+    SELECT COUNT(playDate), longitude, latitude, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
+    WHERE artistId = @artistId
+    GROUP BY longitude, latitude, style ORDER BY count DESC LIMIT 10 """
+    )
+
+    query_params = [
+        bigquery.ScalarQueryParameter(
+            'artistId', 'INT64', artistId)
+    ]
+
+    job_config = bigquery.QueryJobConfig()
+    job_config.query_parameters = query_params
+
+
+    query_job = client.query(
+        query,
+        # Location must match that of the dataset(s) referenced in the query.
+        location="US",
+        job_config=job_config
+    )  # API request - starts the query
+
+    res = query_job.result()
+    styles = plays.Res(many=True).load(res)[0]
+
+    return jsonify({'data': styles})
