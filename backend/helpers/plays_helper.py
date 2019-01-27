@@ -6,14 +6,21 @@ SONG_API = 'https://conuhacks-playback-api.touchtunes.com/song/{}'
 
 def fetch_artist_name(artist_id, obj):
     resp = get(ARTIST_API.format(artist_id))
-    obj['artistName'] = resp['artistName']
-    cache.set(artist_id, resp['artistName'], CACHE_TIMEOUT)
-    return resp['artistName']
+
+    if not resp:
+        obj['artistName'] = 'Unknown'
+    else:
+        obj['artistName'] = resp['artistName']
+    cache.set(artist_id, obj['artistName'], CACHE_TIMEOUT)
+
 
 def fetch_song_name(song_id, obj):
     resp = get(SONG_API.format(song_id))
-    obj['songTitle'] = resp['songTitle']
-    cache.set(song_id, resp['songTitle'], CACHE_TIMEOUT)
-    return resp['songTitle']
+    if resp is None:
+        obj['songTitle'] = 'Unknown'
+    else:
+        print(resp['songTitle'])
+        obj['songTitle'] = resp['songTitle']
+    cache.set(song_id, obj['songTitle'], CACHE_TIMEOUT)
 
 
