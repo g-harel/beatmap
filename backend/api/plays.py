@@ -93,7 +93,8 @@ def get_top_coordinates(artistId):
         """
     SELECT COUNT(playDate), longitude, latitude, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
     WHERE artistId = @artistId
-    GROUP BY longitude, latitude, style ORDER BY count DESC LIMIT 10 """
+    GROUP BY longitude, latitude, style
+    ORDER BY count DESC LIMIT 10 """
     )
 
     query_params = [
