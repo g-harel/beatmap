@@ -1,0 +1,42 @@
+import Bigtable from "@google-cloud/bigtable";
+
+import {Play, Entry} from "./types";
+
+process.env["GOOGLE_APPLICATION_CREDENTIALS"] = "./creds.json";
+
+const bigtable = new Bigtable();
+const instanceName = "plays-dump";
+const tableName = "plays";
+
+const createTable = () => {
+    const instance = bigtable.instance(instanceName);
+    instance.createTable(
+        tableName,
+        {
+            families: [
+                "playDate",
+                "artistId",
+                "songId",
+                "state",
+                "style",
+                "latitude",
+                "longitude",
+            ],
+        },
+        async (err: any, table: any) => {
+            if (err) {
+                throw err;
+            }
+            const [res] = await table.insert([{key: "test", data: {t: "test"} as any as Entry}]).catch(console.error);
+            console.log(res);
+        },
+    );
+};
+
+export const push = async (play: Play) => {
+    console.log(play);
+    const instance = bigtable.instance(instanceName);
+    const table = instance.table(tableName);
+    table.
+
+};
