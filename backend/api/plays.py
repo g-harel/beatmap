@@ -1,10 +1,11 @@
 from flask import Blueprint, jsonify, session, request
 from schema import plays
 from mocks import mocks
-from helpers.plays_helper import fetch_artist_name
-from helpers.cache import cache, CACHE_TIMEOUT
+from helpers.plays_helper import fetch_artist_name,fetch_song_name
+from helpers.cache import cache, song_cache, CACHE_TIMEOUT
 from helpers.big_query_helper import client
 from google.cloud import bigquery
+from threading import Thread
 
 plays_blueprint_name = 'plays'
 plays_route = Blueprint(plays_blueprint_name, __name__, url_prefix='/{}'.format(plays_blueprint_name))
@@ -45,19 +46,16 @@ def get_plays():
 
 
 @plays_route.route('/top', methods=['POST'])
-def get_top_song():
-    request_data, err = plays.PlaysRequestSchema().load(request.get_json(force=True))
-
-    arr = [[[-111.302490234375, 40.622291783092706], [-103.65600585937499, 40.622291783092706],
-      [-103.65600585937499, 45.251688256117646], [-111.302490234375, 45.251688256117646],
-      [-111.302490234375, 40.622291783092706]]]
+def get_top_songs():
+    request_data = request.get_json(force=True)
+    arr = [request_data['coordinates']]
 
     geo_from_json = {"type": "Polygon", "coordinates": arr}
     query = (
         """
-    SELECT songId, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
+    SELECT songId,artistId, COUNT(playDate), style, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
     WHERE ST_DWITHIN(ST_GEOGPOINT(longitude, latitude), ST_GEOGFROMGEOJSON(@s), 0)
-    GROUP BY songId ORDER BY count DESC LIMIT 10 """
+    GROUP BY songId, artistId, style ORDER BY count DESC LIMIT 10 """
     )
     query_params = [
         bigquery.ScalarQueryParameter(
@@ -75,6 +73,32 @@ def get_top_song():
     )  # API request - starts the query
 
     res = query_job.result()
-    data = plays.Res(many=True).load(res)
+    songs = plays.Res(many=True).load(res)[0]
+    thread_pool = []
 
-    return jsonify({'data':data})
+    for song in songs:
+        # check if cached
+        cached_data = cache.get(song['artistId'])
+        if cached_data is None:
+            thread = Thread(target=fetch_artist_name, args=[song['artistId'],song])
+            thread_pool.append(thread)
+            thread.start()
+
+    thread_pool.append(thread)
+    for thread in thread_pool:
+        thread.join()
+
+    # clear the pool for next async operations
+    thread_pool = []
+    for song in songs:
+        cached_data = song_cache.get(song['songId'])
+        if cached_data is None:
+            thread = Thread(target=fetch_song_name, args=[song['songId'], song])
+            thread_pool.append(thread)
+            thread.start()
+
+    thread_pool.append(thread)
+    for thread in thread_pool:
+        thread.join()
+
+    return jsonify({'data': songs})

@@ -9,14 +9,14 @@ class PlaysCoordinatesSchema(Schema):
 class PlaysRequestSchema(Schema):
     start_date = fields.DateTime()
     end_date   = fields.DateTime()
-    coordinates = fields.Nested(PlaysCoordinatesSchema, many=True)
 
 
 class Res(Schema):
     state = fields.String()
+    count = fields.Integer()
     playDate =  fields.DateTime()
     artistId = fields.Integer()
     songId = fields.Integer()
-    style = fields.DateTime()
+    style = fields.String()
     latitude = fields.Float()
     longitude = fields.Float()
