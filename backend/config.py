@@ -10,3 +10,5 @@ class BaseConfig(object):
     SESSION_TYPE = 'sqlalchemy'
     SESSION_USE_SIGNER = True
 
+    # Caching
+    CACHE_TYPE = 'simple'
