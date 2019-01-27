@@ -33,37 +33,47 @@ def get_top_songs():
     request_data = request.get_json(force=True)
     arr = request_data['coordinates']
 
-    avg_coord = []
-    long_coord = 0
-    lat_coord = 0
-    for coord in arr[0]:
-        long_coord += coord[0]
-        lat_coord += coord[1]
-
-    avg_coord.append(long_coord/len(arr[0]))
-    avg_coord.append(lat_coord/len(arr[0]))
-
     geo_from_json = {"type": "Polygon", "coordinates": arr}
     query = (
         """
-    SELECT songId, artistId, style, COUNT(songId) as count FROM `conuhacks2019-229901.plays.*`
-    WHERE ST_DISTANCE(ST_GEOGPOINT(longitude, latitude), ST_GEOGPOINT(@long, @lat)) < 300000
-    AND ST_DWITHIN(ST_GEOGPOINT(longitude, latitude), ST_GEOGFROMGEOJSON(@s), 0)
-    GROUP BY songId, artistId, style
-    ORDER BY count DESC LIMIT 10 """
+SELECT
+  *
+FROM (
+    SELECT
+        songId,
+        artistId,
+        style,
+        COUNT(songId) as count
+    FROM
+        `conuhacks2019-229901.plays.*`
+    WHERE
+        ST_DISTANCE(
+            ST_GEOGPOINT(longitude, latitude),
+            ST_CENTROID(ST_GEOGFROMGEOJSON(@s))
+        ) < ST_MAXDISTANCE(
+            ST_CENTROID(ST_GEOGFROMGEOJSON(@s)),
+            ST_GEOGFROMGEOJSON(@s)
+        ) AND ST_DWITHIN(
+            ST_GEOGPOINT(longitude, latitude),
+            ST_GEOGFROMGEOJSON(@s),
+            0
+        )
+    GROUP BY
+        songId,
+        artistId,
+        style
+    LIMIT 10
+)
+ORDER BY
+    count DESC
+        """
     )
+
     query_params = [
         bigquery.ScalarQueryParameter(
             's', 'STRING', str(geo_from_json),
         ),
-        bigquery.ScalarQueryParameter(
-            'long', 'FLOAT', avg_coord[0],
-        ),
-        bigquery.ScalarQueryParameter(
-            'lat', 'FLOAT', avg_coord[1],
-        ),
-
-        ]
+    ]
 
     job_config = bigquery.QueryJobConfig()
     job_config.query_parameters = query_params

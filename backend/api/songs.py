@@ -40,7 +40,6 @@ def get_top_coordinates_for_style(style_name):
         GROUP BY longitude, latitude ORDER BY count DESC LIMIT 10 """
         )
 
-        print(style_name)
         query_params = [
             bigquery.ScalarQueryParameter(
                 'style', 'STRING', str(style_name))

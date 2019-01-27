@@ -19,7 +19,6 @@ def fetch_song_name(song_id, obj):
     if resp is None:
         obj['songTitle'] = 'Unknown'
     else:
-        print(resp['songTitle'])
         obj['songTitle'] = resp['songTitle']
     cache.set(song_id, obj['songTitle'], CACHE_TIMEOUT)
 
