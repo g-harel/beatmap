@@ -24,18 +24,20 @@ interface ApiData {
 }
 
 const fetchData = async (data: MapData): Promise<ApiData[]> => {
-    const grouped: [number, number][][] = [];
+    const coordinates: [number, number][][] = [];
 
     data.features.forEach((feature) => {
-        grouped.push(feature.geometry.coordinates[0]);
+        coordinates.push(feature.geometry.coordinates[0]);
     });
-    console.log("req", grouped);
+    console.log("req", coordinates);
 
-    const res = await fetch("http://localhost:5000/plays", {
+    const res = await fetch("http://localhost:5000/plays/top", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(grouped),
+        body: JSON.stringify({coordinates}),
     }).then((response) => response.json());
+
+    if (res.error) throw res.error;
 
     console.log("res", res);
     return res;

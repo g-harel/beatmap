@@ -71,3 +71,4 @@ typings/
 .data
 .dist
 .cache
+creds.json
