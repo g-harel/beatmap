@@ -2,7 +2,7 @@
   "name": "abc",
   "scripts": {
     "scrape": "ts-node scraper",
-    "fmt": "prettier --list-different --write --ignore-path .gitignore \"**/*.{js,ts,tsx}\""
+    "fmt": "prettier --list-different --write --ignore-path .gitignore \"**/*.{ts,tsx}\""
   },
   "dependencies": {
     "got": "^9.6.0",
